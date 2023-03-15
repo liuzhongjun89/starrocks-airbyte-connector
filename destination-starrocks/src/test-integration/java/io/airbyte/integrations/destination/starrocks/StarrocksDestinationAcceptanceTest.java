@@ -5,9 +5,20 @@
 package io.airbyte.integrations.destination.starrocks;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.airbyte.commons.io.IOs;
+import io.airbyte.commons.json.Jsons;
+import io.airbyte.integrations.base.JavaBaseConstants;
+import io.airbyte.integrations.destination.StandardNameTransformer;
 import io.airbyte.integrations.standardtest.destination.DestinationAcceptanceTest;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +26,28 @@ public class StarrocksDestinationAcceptanceTest extends DestinationAcceptanceTes
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StarrocksDestinationAcceptanceTest.class);
 
+  private static final StandardNameTransformer namingResolver = new StandardNameTransformer();
+
   private JsonNode configJson;
+
+  private static Connection conn = null;
 
   @Override
   protected String getImageName() {
     return "airbyte/destination-starrocks:dev";
+  }
+
+  @BeforeAll
+  public static void getConnect() throws SQLException, ClassNotFoundException {
+    JsonNode config = Jsons.deserialize(IOs.readFile(Paths.get("../../../secrets/config.json")));
+    conn = SqlUtil.createJDBCConnection(config);
+  }
+
+  @AfterAll
+  public static void closeConnect() throws SQLException {
+    if (conn != null) {
+      conn.close();
+    }
   }
 
   @Override
@@ -27,6 +55,8 @@ public class StarrocksDestinationAcceptanceTest extends DestinationAcceptanceTes
     // TODO: Generate the configuration JSON file to be used for running the destination during the test
     // configJson can either be static and read from secrets/config.json directly
     // or created in the setup method
+    configJson = Jsons.deserialize(IOs.readFile(Paths.get("../../../secrets/config.json")));
+
     return configJson;
   }
 
@@ -42,11 +72,25 @@ public class StarrocksDestinationAcceptanceTest extends DestinationAcceptanceTes
                                            String streamName,
                                            String namespace,
                                            JsonNode streamSchema)
-      throws IOException {
+          throws IOException, SQLException {
     // TODO Implement this method to retrieve records which written to the destination by the connector.
     // Records returned from this method will be compared against records provided to the connector
     // to verify they were written correctly
-    return null;
+    final String tableName = namingResolver.getIdentifier(streamName);
+
+    String query = String.format(
+            "SELECT * FROM %s.%s ORDER BY %s ASC;", configJson.get("database").asText(), tableName,
+            JavaBaseConstants.COLUMN_NAME_EMITTED_AT);
+    PreparedStatement stmt = conn.prepareStatement(query);
+    ResultSet resultSet = stmt.executeQuery();
+
+    List<JsonNode> res = new ArrayList<>();
+    while (resultSet.next()) {
+      String sss = resultSet.getString(JavaBaseConstants.COLUMN_NAME_DATA);
+      res.add(Jsons.deserialize(StringEscapeUtils.unescapeJava(sss)));
+    }
+    stmt.close();
+    return res;
   }
 
   @Override
