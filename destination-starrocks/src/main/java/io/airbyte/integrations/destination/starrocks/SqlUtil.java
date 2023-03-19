@@ -22,9 +22,14 @@ public class SqlUtil {
             Class.forName(StarRocksConstants.JDBC_DRIVER);
         }
 
-        return DriverManager.getConnection(dbUrl
-                , config.get(StarRocksConstants.KEY_USER).asText(StarRocksConstants.DEFAULT_USER)
-                , config.get(StarRocksConstants.KEY_PWD).asText(StarRocksConstants.DEFAULT_PWD));
+        String user = config.get(StarRocksConstants.KEY_USER)==null ?
+                StarRocksConstants.DEFAULT_USER :
+                config.get(StarRocksConstants.KEY_USER).asText();
+        String pwd = config.get(StarRocksConstants.KEY_PWD)==null ?
+                StarRocksConstants.DEFAULT_PWD :
+                config.get(StarRocksConstants.KEY_PWD).asText();
+
+        return DriverManager.getConnection(dbUrl, user, pwd);
     }
 
     public static void execute(Connection conn, String sql) throws SQLException {
@@ -68,7 +73,7 @@ public class SqlUtil {
     }
 
     public static void dropTableIfExists(Connection conn, String tableName) throws SQLException {
-        String sql = String.format("DROP TABLE IF NOT EXISTS `%s`;", tableName);
+        String sql = String.format("DROP TABLE IF EXISTS `%s`;", tableName);
         execute(conn, sql);
     }
 

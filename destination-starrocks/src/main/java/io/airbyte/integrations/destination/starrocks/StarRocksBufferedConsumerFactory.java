@@ -31,7 +31,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class StarRocksBufferedConsumerFactory {
-  private static final int MAX_BATCH_SIZE_BYTES = 512 * 1024 * 1024; // 512MB
+  private static final int MAX_BATCH_SIZE_BYTES = 128 * 1024 * 1024; // 512MB
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StarRocksBufferedConsumerFactory.class);
 
@@ -138,8 +138,12 @@ public class StarRocksBufferedConsumerFactory {
   private static Function<ConfiguredAirbyteStream, StarRocksWriteConfig> createWriteConfig(NamingConventionTransformer namingResolver, JsonNode config){
     return stream -> {
       String feHost = config.get(StarRocksConstants.KEY_FE_HOST).asText();
-      String user = config.get(StarRocksConstants.KEY_USER).asText(StarRocksConstants.DEFAULT_USER);
-      String password = config.get(StarRocksConstants.KEY_PWD).asText(StarRocksConstants.DEFAULT_PWD);
+      String user = config.get(StarRocksConstants.KEY_USER)==null ?
+              StarRocksConstants.DEFAULT_USER :
+              config.get(StarRocksConstants.KEY_USER).asText();
+      String password = config.get(StarRocksConstants.KEY_PWD)==null ?
+              StarRocksConstants.DEFAULT_PWD :
+              config.get(StarRocksConstants.KEY_PWD).asText();
       int httpPort = config.get(StarRocksConstants.KEY_FE_HTTP_PORT).asInt(StarRocksConstants.DEFAULT_FE_HTTP_PORT);
 
       final DestinationSyncMode syncMode = stream.getDestinationSyncMode();
@@ -170,6 +174,8 @@ public class StarRocksBufferedConsumerFactory {
             .tmpTableName(tmpTableName)
             .syncMode(syncMode)
             .streamLoader(streamLoader)
+            .namespace(airbyteStream.getNamespace())
+            .streamName(streamName)
             .build();
     };
   }

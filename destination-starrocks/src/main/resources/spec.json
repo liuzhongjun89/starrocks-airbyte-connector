@@ -40,18 +40,21 @@
         "title": "DataBase Name",
         "description": "Name of the database.",
         "type": "string",
+        "default": "airbyte",
         "order": 3
       },
       "username": {
         "title": "UserName",
         "description": "Username to use to access the database.",
         "type": "string",
+        "default": "root",
         "order": 4
       },
       "password": {
         "title": "Password",
         "description": "Password associated with the username.",
         "type": "string",
+        "default": "",
         "airbyte_secret": true,
         "order": 5
       }

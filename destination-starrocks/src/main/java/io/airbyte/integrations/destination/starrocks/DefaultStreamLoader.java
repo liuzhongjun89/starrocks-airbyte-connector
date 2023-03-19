@@ -82,7 +82,7 @@ public class DefaultStreamLoader implements StreamLoader {
             throw new IOException("Could not find an available fe host.");
         }
 
-        String sendUrl = host + loadUrlPath;
+        String sendUrl = String.format("http://%s:%d%s",host, properties.getHttpPort(), loadUrlPath);
         String label = StreamLoadUtils.label(loadTable);
 
         HttpPut httpPut = new HttpPut(sendUrl);
@@ -167,9 +167,9 @@ public class DefaultStreamLoader implements StreamLoader {
 
     private boolean testHttpConnection(String host) {
         try {
-            URL url = new URL(host);
+            URL url = new URL(String.format("http://%s:%d",host,properties.getHttpPort()));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(30000);
+            connection.setConnectTimeout(5000);
             connection.connect();
             connection.disconnect();
             return true;
