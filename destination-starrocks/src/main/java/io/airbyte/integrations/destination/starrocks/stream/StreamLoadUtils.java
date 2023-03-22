@@ -74,7 +74,7 @@ public class StreamLoadUtils {
     public static String getBasicAuthHeader(String username, String password) {
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
-        return "Basic " + new String(encodedAuth);
+        return "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
     }
 
     public static Header[] getHeaders(String user, String pwd) {

@@ -46,7 +46,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class StarRocksBufferedConsumerFactory {
-    private static final int MAX_BATCH_SIZE_BYTES = 128 * 1024 * 1024; // 512MB
+    private static final int MAX_BATCH_SIZE_BYTES = 128 * 1024 * 1024;
 
     private static final Logger LOG = LoggerFactory.getLogger(StarRocksBufferedConsumerFactory.class);
 
