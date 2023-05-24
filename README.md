@@ -4,7 +4,7 @@ Host [airbyte](https://airbyte.com) connector for StarRocks
 
 connector including:
 
- * [destination-strocks](./destination-strocks), which sink data to StarRocks.
+ * [destination-starrocks](./destination-starrocks), which sink data to StarRocks.
 
  * [source-starrocks](./source-starrocks), which read from StarRocks, under development.
 
