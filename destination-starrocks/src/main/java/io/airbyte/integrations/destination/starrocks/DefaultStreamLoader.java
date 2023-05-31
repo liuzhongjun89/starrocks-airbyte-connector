@@ -109,9 +109,9 @@ public class DefaultStreamLoader implements StreamLoader {
         LOG.info("Stream loading, label : {}, database : {}, table : {}, request : {}",
                 label, database, loadTable, httpPut);
 
+        String responseBody = null;
         try (CloseableHttpClient client = clientBuilder.build()) {
             long startNanoTime = System.nanoTime();
-            String responseBody;
             try (CloseableHttpResponse response = client.execute(httpPut)) {
                 responseBody = EntityUtils.toString(response.getEntity());
             }
@@ -151,11 +151,11 @@ public class DefaultStreamLoader implements StreamLoader {
         } catch (StreamLoadFailException e) {
             throw e;
         }  catch (Exception e) {
+            LOG.error("error response from stream load: \n" + responseBody);
             String errorMsg = String.format("Stream load failed because of unknown exception, db: %s, table: %s, " +
                     "label: %s", database, loadTable, label);
             throw new StreamLoadFailException(errorMsg, e);
         }
-
     }
 
     protected String getAvailableHost() {
