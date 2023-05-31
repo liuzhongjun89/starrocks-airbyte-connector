@@ -18,7 +18,6 @@
 
 package io.airbyte.integrations.destination.starrocks.io;
 
-import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import io.airbyte.commons.json.Jsons;
 import io.airbyte.protocol.models.v0.AirbyteRecordMessage;
 
@@ -41,11 +40,9 @@ public class StreamLoadStream extends InputStream {
     private byte[] cache;
     private int pos;
     private boolean endStream = false;
-    private JsonStringEncoder jsonEncoder;
 
     public StreamLoadStream(Iterator<AirbyteRecordMessage> recordIter) {
         this.recordIter = recordIter;
-        jsonEncoder = JsonStringEncoder.getInstance();
 
         buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
         buffer.position(buffer.capacity());
@@ -144,7 +141,7 @@ public class StreamLoadStream extends InputStream {
             return String.format(CsvFormat.LINE_PATTERN,
                     UUID.randomUUID(),
                     record.getEmittedAt(),
-                    new String(jsonEncoder.quoteAsString(Jsons.serialize(record.getData())))).getBytes(StandardCharsets.UTF_8);
+                Jsons.serialize(record.getData())).getBytes(StandardCharsets.UTF_8);
         } else {
             endStream = true;
             return CsvFormat.LINE_DELIMITER_BYTE;
