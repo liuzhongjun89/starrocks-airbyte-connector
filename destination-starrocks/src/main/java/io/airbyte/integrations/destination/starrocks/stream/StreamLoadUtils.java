@@ -25,7 +25,7 @@ import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.example.airbyte.StarRocksConstants;
+import io.airbyte.integrations.destination.starrocks.StarRocksConstants;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
